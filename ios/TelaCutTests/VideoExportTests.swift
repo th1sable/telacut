@@ -1,5 +1,6 @@
 import XCTest
 import AVFoundation
+import UIKit
 @testable import TelaCut
 
 final class VideoExportTests: XCTestCase {
@@ -48,6 +49,10 @@ final class VideoExportTests: XCTestCase {
         NSLog("TelaCut export test: checking decoded pixels")
         generator.appliesPreferredTrackTransform = true
         let frame = try generator.copyCGImage(at: CMTime(seconds: 0.25, preferredTimescale: 600), actualTime: nil)
+        let attachment = XCTAttachment(image: UIImage(cgImage: frame))
+        attachment.name = "Exported frame: reordered blue clip and title"
+        attachment.lifetime = .keepAlways
+        add(attachment)
         var bytes = [UInt8](repeating: 0, count: frame.width * frame.height * 4)
         let context = try XCTUnwrap(CGContext(data: &bytes, width: frame.width, height: frame.height, bitsPerComponent: 8, bytesPerRow: frame.width * 4, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
         context.draw(frame, in: CGRect(x: 0, y: 0, width: frame.width, height: frame.height))

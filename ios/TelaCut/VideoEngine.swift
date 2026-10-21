@@ -1,6 +1,5 @@
 import AVFoundation
 import UIKit
-import CoreText
 
 struct RenderPayload {
     let composition: AVMutableComposition
@@ -77,15 +76,22 @@ enum VideoEngine {
         video.renderSize = size; video.frameDuration = CMTime(value: 1, timescale: 30); video.instructions = instructions
         // CoreAnimationTool is export-only; the preview draws the title as a SwiftUI overlay.
         if forExport && !project.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            // The title is static: rasterize it once so export does not depend on
+            // CATextLayer's asynchronous display/transaction lifecycle.
+            let font = UIFont.systemFont(ofSize: 48, weight: .semibold)
+            let paragraph = NSMutableParagraphStyle(); paragraph.alignment = .center
+            let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: UIColor.white, .paragraphStyle: paragraph]
+            let bounds = (project.title as NSString).boundingRect(with: CGSize(width: size.width * 0.8 - 20, height: 480), options: [.usesLineFragmentOrigin, .usesFontLeading], attributes: attributes, context: nil)
+            let height = min(500, ceil(bounds.height) + 20)
+            let titleRect = CGRect(x: size.width * 0.1, y: size.height * 0.9 - height, width: size.width * 0.8, height: height)
+            let format = UIGraphicsImageRendererFormat(); format.scale = 1; format.opaque = false
+            let titleImage = UIGraphicsImageRenderer(size: size, format: format).image { _ in
+                UIColor.black.withAlphaComponent(0.7).setFill()
+                UIBezierPath(roundedRect: titleRect, cornerRadius: 12).fill()
+                (project.title as NSString).draw(with: titleRect.insetBy(dx: 10, dy: 10), options: [.usesLineFragmentOrigin, .usesFontLeading], attributes: attributes, context: nil)
+            }
             let parent = CALayer(); parent.frame = CGRect(origin: .zero, size: size)
-            let title = CATextLayer()
-            title.string = project.title; title.font = CTFontCreateWithName("HelveticaNeue-Medium" as CFString, 48, nil)
-            title.fontSize = 48; title.alignmentMode = .center; title.isWrapped = true
-            title.foregroundColor = UIColor.white.cgColor; title.backgroundColor = UIColor.black.withAlphaComponent(0.7).cgColor
-            title.cornerRadius = 12; title.contentsScale = 2
-            let bounds = (project.title as NSString).boundingRect(with: CGSize(width: size.width * 0.8, height: 500), options: [.usesLineFragmentOrigin, .usesFontLeading], attributes: [.font: UIFont.systemFont(ofSize: 48, weight: .semibold)], context: nil)
-            title.frame = CGRect(x: size.width * 0.1, y: size.height * 0.1, width: size.width * 0.8, height: min(500, ceil(bounds.height) + 20))
-            parent.addSublayer(title)
+            parent.contents = titleImage.cgImage
             // Composite the title as a separate track. The post-processing API can
             // crash inside CoreAnimation/IOSurface on iOS simulators.
             let titleTrackID = composition.unusedTrackID()
@@ -93,6 +99,7 @@ enum VideoEngine {
             for case let instruction as AVMutableVideoCompositionInstruction in instructions {
                 let overlay = AVMutableVideoCompositionLayerInstruction()
                 overlay.trackID = titleTrackID
+                overlay.setOpacity(1, at: .zero)
                 instruction.layerInstructions.insert(overlay, at: 0)
             }
         }
