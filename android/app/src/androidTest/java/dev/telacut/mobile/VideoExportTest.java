@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.core.app.ActivityScenario;
 import androidx.media3.common.MimeTypes;
 import androidx.media3.transformer.*;
 import org.junit.Test;
@@ -18,6 +19,14 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 @androidx.annotation.OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
 public class VideoExportTest {
+    @Test public void launchesEditorAndRecreatesActivity() {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            scenario.onActivity(activity -> assertNotNull(activity.findViewById(android.R.id.content)));
+            scenario.recreate();
+            scenario.onActivity(activity -> assertFalse(activity.isFinishing()));
+        }
+    }
+
     private File fixture(Context context, String name) throws Exception {
         File destination = new File(context.getCacheDir(), "fixture-" + name);
         try (InputStream in = InstrumentationRegistry.getInstrumentation().getContext().getAssets().open(name);

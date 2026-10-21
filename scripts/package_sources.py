@@ -7,7 +7,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('destination', type=Path)
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
-excluded = {'.git', '.gradle', 'build', 'DerivedData', '__pycache__', '.swiftpm', '.signing', 'dist'}
+excluded = {'.git', '.gradle', 'build', 'DerivedData', 'TestDerivedData', 'TestResults.xcresult',
+            'TestDiagnostics', '__pycache__', '.swiftpm', '.signing', 'dist'}
 secret_suffixes = {'.jks', '.keystore', '.p12', '.mobileprovision', '.apk', '.ipa'}
 assert not args.destination.exists(), 'Refusing to overwrite an archive'
 args.destination.parent.mkdir(parents=True, exist_ok=True)

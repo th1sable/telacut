@@ -1,0 +1,55 @@
+TELACUT - INSTALLAZIONE E PRIMO MONTAGGIO
+
+Scarica i pacchetti dalla sezione Releases:
+https://github.com/th1sable/telacut/releases
+Leggi lo stato delle verifiche e i limiti nelle note della versione.
+
+ANDROID (Android 10 o successivo)
+1. Scarica il file TelaCut-0.2.0-Android.apk sul telefono.
+2. Aprilo da Download e, se richiesto, consenti a quel browser/gestore file
+   di installare app. Conferma l'installazione di TelaCut.
+3. Apri TelaCut. Non serve un account.
+Il pacchetto pubblico e' firmato; gli aggiornamenti devono mantenere la stessa
+firma. La precedente app TelaCut di sviluppo (.dev) e' separata.
+
+IPHONE (iOS 16 o successivo)
+1. Configura AltStore Classic seguendo la guida ufficiale:
+   https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows
+2. Scarica TelaCut-0.2.0-iPhone.ipa da Releases nell'app File.
+3. In AltStore Classic apri My Apps, premi + e seleziona l'IPA.
+4. Completa la firma/installazione tramite AltStore e apri TelaCut.
+L'IPA distribuito non contiene una firma personale Apple: AltStore la applica
+durante l'installazione. Non basta aprire l'IPA da Safari o File.
+Nel normale uso gratuito di AltStore Classic le app scadono dopo 7 giorni
+e vanno rinnovate; e' previsto un limite di 3 app installate tramite sideload.
+Segui le indicazioni correnti di AltStore per firma, rinnovo e AltServer.
+Questa distribuzione e' per AltStore Classic, non AltStore PAL.
+Guida: https://faq.altstore.io/altstore-classic/your-altstore
+
+PRIMO VIDEO
+1. Crea un progetto e importa uno o piu' video da Foto o File.
+2. Seleziona una clip per accorciarla, dividerla o cambiarne l'ordine.
+3. Scegli il formato, un eventuale titolo e una traccia musicale.
+4. Esporta e tieni l'app aperta fino al completamento.
+5. Salva o condividi il video MP4.
+Android salva le esportazioni in Movies/TelaCut. Su iPhone usa Salva in Foto
+o Condividi dopo l'esportazione. La richiesta di accesso a Foto serve a salvare.
+
+PROGETTI E FILE
+Il salvataggio dei progetti e' locale. Eliminare un progetto non elimina i
+video originali ne' le copie importate, che possono servire ad altri progetti.
+Disinstallare l'app puo' eliminare i progetti e le copie private dei media.
+I progetti non vengono sincronizzati tra Android e iPhone.
+
+FUNZIONI DI QUESTA VERSIONE
+Montaggio sequenziale, taglio, divisione, riordino, annullamento, un titolo,
+una musica di sottofondo, formati 9:16/16:9/1:1 ed esportazione MP4.
+Non sono inclusi IA, sottotitoli automatici, template, transizioni o keyframe.
+
+PER IL PROPRIETARIO: FIRMA ANDROID
+Lo script scripts/sign_android.ps1 crea e riutilizza una chiave privata
+in .signing, esclusa da Git e dagli archivi sorgenti.
+Conserva questa cartella: serve per produrre aggiornamenti compatibili.
+La password e' protetta da Windows DPAPI e legata al profilo Windows che
+l'ha creata. Copiare soltanto quei file su un altro PC non basta a recuperarla.
+Non caricare .signing su GitHub o includerla nei file per gli utenti.
