@@ -239,7 +239,7 @@ public class MainActivity extends Activity {
         busy = true; if (player != null) { playerView.setPlayer(null); player.release(); player = null; }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         exportFile = new File(getCacheDir(), "telacut-" + UUID.randomUUID() + ".mp4");
-        exporter = new Transformer.Builder(this).setVideoMimeType(MimeTypes.VIDEO_H264).setAudioMimeType(MimeTypes.AUDIO_AAC)
+        exporter = new Transformer.Builder(this).setUsePlatformDiagnostics(false).setVideoMimeType(MimeTypes.VIDEO_H264).setAudioMimeType(MimeTypes.AUDIO_AAC)
             .addListener(new Transformer.Listener() {
                 @Override public void onCompleted(Composition c, ExportResult r) { publishVideo(exportFile); }
                 @Override public void onError(Composition c, ExportResult r, ExportException e) {

@@ -54,7 +54,7 @@ public class VideoExportTest {
         try {
             InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
                 try {
-                    Transformer t = new Transformer.Builder(context).setVideoMimeType(MimeTypes.VIDEO_H264).setAudioMimeType(MimeTypes.AUDIO_AAC)
+                    Transformer t = new Transformer.Builder(context).setUsePlatformDiagnostics(false).setVideoMimeType(MimeTypes.VIDEO_H264).setAudioMimeType(MimeTypes.AUDIO_AAC)
                         .addListener(new Transformer.Listener() {
                             @Override public void onCompleted(Composition c, ExportResult r) { complete.countDown(); }
                             @Override public void onError(Composition c, ExportResult r, ExportException e) { failure.set(e); complete.countDown(); }
@@ -67,8 +67,13 @@ public class VideoExportTest {
             try (MediaMetadataRetriever meta = new MediaMetadataRetriever()) {
                 meta.setDataSource(output.getAbsolutePath());
                 assertEquals(2000, Long.parseLong(meta.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)), 120);
-                assertEquals("1080", meta.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-                assertEquals("1920", meta.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+                int encodedWidth = Integer.parseInt(meta.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+                int encodedHeight = Integer.parseInt(meta.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+                int rotation = Integer.parseInt(meta.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+                // Media3 may encode landscape pixels plus a rotation matrix for broader codec support.
+                boolean swapped = rotation == 90 || rotation == 270;
+                assertEquals(1080, swapped ? encodedHeight : encodedWidth);
+                assertEquals(1920, swapped ? encodedWidth : encodedHeight);
                 assertEquals("yes", meta.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO));
                 Bitmap frame = meta.getFrameAtTime(250000, MediaMetadataRetriever.OPTION_CLOSEST);
                 assertNotNull(frame);
