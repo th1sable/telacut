@@ -108,4 +108,8 @@ enum MediaFiles {
             return project
         }
     }
+    static func delete(_ project: Project) throws {
+        let file = projects.appendingPathComponent(project.id.uuidString + ".json")
+        if FileManager.default.fileExists(atPath: file.path) { try FileManager.default.removeItem(at: file) }
+    }
 }

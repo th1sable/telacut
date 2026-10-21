@@ -1,13 +1,13 @@
 # TelaCut — studio video mobile
 
-Prima implementazione **0.1.0**, originale, per Android e iPhone. Nome provvisorio.
+Versione **0.2.0** in preparazione, originale, per Android e iPhone. Nome provvisorio.
 Non è CapCut, non ne contiene il codice o i contenuti e non dichiara parità funzionale.
 È un progetto in sviluppo: leggere `VERIFICA.md` prima di installare o distribuire.
 
 ## Funzioni implementate nel codice
 
 - Importazione multipla di video, copiati nello spazio privato dell'app.
-- Progetti locali, riapertura, rinomina e salvataggio atomico.
+- Progetti locali, riapertura, rinomina, eliminazione con conferma e salvataggio atomico.
 - Timeline sequenziale fino a 60 clip; selezione e anteprima.
 - Taglio degli estremi, divisione al cursore, riordino, rimozione dalla timeline.
 - Annullamento delle ultime 30 modifiche della sessione.
@@ -86,7 +86,8 @@ rispettandone i limiti già discussi. Non è una pubblicazione su AltStore PAL.
 
 ## GitHub
 
-Nessun repository è stato creato o modificato dall'agente, e nessuna release è stata pubblicata.
+Repository: https://github.com/th1sable/telacut . Le compilazioni e le prove
+di esportazione vengono eseguite con GitHub Actions. Nessuna release è stata ancora pubblicata.
 Il workflow produce artefatti di sviluppo; **non pubblica automaticamente release per gli utenti**.
 Prima della distribuzione pubblica occorrono test reali, firma Android definitiva,
 build/firma iOS, istruzioni d'installazione e una scelta esplicita della licenza del progetto.
@@ -108,7 +109,7 @@ La licenza del codice originale non è stata scelta al posto del proprietario.
 - Limite di importazione: 1 GB per file. Lo spazio per copie e video esportati resta necessario.
 - I media importati restano conservati anche quando una clip è rimossa dalla timeline:
   possono servire ad altri progetti o all'annullamento. Non c'è ancora pulizia dello spazio da UI.
-- Non sono ancora presenti eliminazione dei progetti, ripristino da backup o migrazioni di schema.
+- Non sono ancora presenti ripristino da backup o migrazioni di schema.
 - Il nome e l'icona sono provvisori. L'interfaccia nativa non è stata verificata visivamente su telefono.
 
 ## REA

@@ -103,7 +103,7 @@ public class MainActivity extends Activity {
         root.addView(export, new LinearLayout.LayoutParams(-1, dp(54)));
         cancel = new Button(this); cancel.setText("Annulla esportazione"); cancel.setVisibility(busy && exporter != null ? View.VISIBLE : View.GONE);
         cancel.setOnClickListener(v -> cancelExport()); root.addView(cancel);
-        root.addView(label("v0.1 · elaborazione sul dispositivo · nessun account\nTieni l'app aperta durante l'esportazione.", 11, MUTED));
+        root.addView(label("v0.2 · elaborazione sul dispositivo · nessun account\nTieni l'app aperta durante l'esportazione.", 11, MUTED));
     }
     private void remember() { undo.push(p.copy()); if (undo.size() > 30) undo.removeLast(); }
     private void save() { try { store.save(p); } catch (Exception e) { message("Salvataggio non riuscito: " + e.getMessage()); } }
@@ -222,7 +222,17 @@ public class MainActivity extends Activity {
         File[] files = store.list(); ArrayList<Project> projects = new ArrayList<>(); ArrayList<String> names = new ArrayList<>();
         for (File file : files) try { Project loaded = store.load(file); projects.add(loaded); names.add(loaded.name + " · " + seconds(loaded.durationMs()) + " s"); } catch (Exception ignored) { }
         if (names.isEmpty()) { message("Ancora nessun progetto salvato"); return; }
-        new AlertDialog.Builder(this).setTitle("I tuoi progetti").setItems(names.toArray(new String[0]), (d, which) -> { save(); p = projects.get(which); undo.clear(); selected = 0; changed(); }).show();
+        new AlertDialog.Builder(this).setTitle("I tuoi progetti").setItems(names.toArray(new String[0]), (d, which) -> {
+            Project target = projects.get(which);
+            new AlertDialog.Builder(this).setTitle(target.name).setItems(new String[]{"Apri progetto", "Elimina progetto"}, (dialog, action) -> {
+                if (action == 0) { save(); p = target; undo.clear(); selected = 0; changed(); }
+                else new AlertDialog.Builder(this).setTitle("Eliminare il progetto?").setMessage("I video originali rimangono sul telefono.")
+                    .setNegativeButton("Annulla", null).setPositiveButton("Elimina", (confirm, button) -> {
+                        try { store.delete(target); if (p.id.equals(target.id)) { p = new Project(); undo.clear(); selected = 0; screen(); refreshPreview(); } }
+                        catch (Exception e) { message(e.getMessage()); }
+                    }).show();
+            }).show();
+        }).show();
     }
     private void export() {
         p.validate(); Composition composition = MediaEngine.composition(p); save();

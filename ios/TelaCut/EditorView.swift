@@ -23,6 +23,7 @@ struct EditorView: View {
     @State private var showTrim = false
     @State private var showAudio = false
     @State private var confirmRemove = false
+    @State private var projectToDelete: Project?
     @State private var textDraft = ""
     @State private var nameDraft = ""
     private let accent = Color(red: 0.72, green: 0.67, blue: 1)
@@ -101,7 +102,7 @@ struct EditorView: View {
                         }.font(.subheadline).foregroundStyle(accent)
                     }
                     Text(model.status).font(.caption).foregroundStyle(.secondary)
-                    Text("v0.1 · elaborazione sul dispositivo · nessun account\nTieni l'app aperta durante l'esportazione.").font(.caption2).foregroundStyle(.secondary)
+                    Text("v0.2 · elaborazione sul dispositivo · nessun account\nTieni l'app aperta durante l'esportazione.").font(.caption2).foregroundStyle(.secondary)
                 }.padding(20)
             }.disabled(model.busy)
             if model.busy {
@@ -134,7 +135,12 @@ struct EditorView: View {
         }
         .onChange(of: scenePhase) { phase in if phase != .active { model.player.pause(); model.save() } }
         .sheet(isPresented: $showProjects) {
-            NavigationStack { List(model.savedProjects) { p in Button { model.open(p); showProjects = false } label: { VStack(alignment: .leading) { Text(p.name); Text("\(p.clips.count) clip · \(p.duration, specifier: "%.1f") s").font(.caption).foregroundStyle(.secondary) } } }
+            NavigationStack { List(model.savedProjects) { p in Button { model.open(p); showProjects = false } label: { VStack(alignment: .leading) { Text(p.name); Text("\(p.clips.count) clip · \(p.duration, specifier: "%.1f") s").font(.caption).foregroundStyle(.secondary) } }
+                .swipeActions { Button("Elimina", role: .destructive) { projectToDelete = p } }
+            }
+                .confirmationDialog("Eliminare questo progetto? I video originali rimangono sul telefono.", isPresented: Binding(get: { projectToDelete != nil }, set: { if !$0 { projectToDelete = nil } }), titleVisibility: .visible) {
+                    Button("Elimina progetto", role: .destructive) { if let target = projectToDelete { model.deleteProject(target) }; projectToDelete = nil }
+                }
                 .navigationTitle("I tuoi progetti").toolbar { Button("Chiudi") { showProjects = false } } }
         }
         .sheet(isPresented: $showTrim) { if let clip = model.current { TrimSheet(clip: clip) { from, to in let index = model.selected; model.edit { try $0.clips[index].trim(from: from, to: to) } } } }

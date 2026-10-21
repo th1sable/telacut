@@ -51,4 +51,9 @@ final class ProjectStore {
         if (files == null) return new File[0];
         Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed()); return files;
     }
+    void delete(Project project) throws IOException {
+        File file = new File(root, UUID.fromString(project.id) + ".json");
+        new AtomicFile(file).delete();
+        if (file.exists()) throw new IOException("Impossibile eliminare il progetto");
+    }
 }

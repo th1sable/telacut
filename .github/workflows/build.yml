@@ -1,4 +1,4 @@
-name: Build TelaCut (development artifacts)
+name: Build and verify TelaCut
 on:
   workflow_dispatch:
   pull_request:
@@ -6,31 +6,56 @@ on:
     branches: [main]
 permissions:
   contents: read
+concurrency:
+  group: telacut-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   android:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
       - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
       - run: gradle -p android --no-daemon testDebugUnitTest assembleDebug assembleRelease
-      - uses: actions/upload-artifact@v4
+      - name: Generate original test media
+        run: |
+          if ! command -v ffmpeg >/dev/null; then sudo apt-get update && sudo apt-get install -y ffmpeg; fi
+          mkdir -p android/app/src/androidTest/assets
+          ffmpeg -hide_banner -loglevel error -f lavfi -i color=c=red:s=320x180:r=30:d=2 -c:v libx264 -pix_fmt yuv420p android/app/src/androidTest/assets/red.mp4
+          ffmpeg -hide_banner -loglevel error -f lavfi -i color=c=blue:s=320x180:r=30:d=2 -c:v libx264 -pix_fmt yuv420p android/app/src/androidTest/assets/blue.mp4
+          ffmpeg -hide_banner -loglevel error -f lavfi -i sine=frequency=220:duration=1 -ar 48000 android/app/src/androidTest/assets/music.wav
+      - name: Allow runner to use its emulator acceleration
+        run: sudo setfacl -m u:"$(id -un)":rw /dev/kvm
+      - name: Run video export and project storage tests on Android
+        uses: reactivecircus/android-emulator-runner@v2
         with:
-          name: TelaCut-Android-development
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
+          script: gradle -p android --no-daemon connectedDebugAndroidTest
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: TelaCut-Android-build-and-tests
           path: |
             android/app/build/outputs/apk/debug/*.apk
             android/app/build/outputs/apk/release/*unsigned.apk
             android/app/build/reports/tests/
+            android/app/build/reports/androidTests/
+            android/app/build/outputs/androidTest-results/
           if-no-files-found: error
   ios:
     runs-on: macos-15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - run: brew install xcodegen
@@ -40,7 +65,7 @@ jobs:
           xcodebuild -project ios/TelaCut.xcodeproj -scheme TelaCut
           -configuration Release -sdk iphoneos -destination 'generic/platform=iOS'
           -derivedDataPath ios/DerivedData CODE_SIGNING_ALLOWED=NO build
-      - name: Run model tests on an available iPhone simulator
+      - name: Run model, storage and video export tests on an iPhone simulator
         run: python3 scripts/test_ios_simulator.py
       - name: Package for subsequent signing
         run: python3 scripts/package_ipa.py ios/DerivedData/Build/Products/Release-iphoneos/TelaCut.app dist/TelaCut-unsigned.ipa

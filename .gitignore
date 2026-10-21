@@ -11,3 +11,7 @@
 *.apk
 *.ipa
 .DS_Store
+__pycache__/
+.signing/
+dist/
+android/app/src/androidTest/assets/

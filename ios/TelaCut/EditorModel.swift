@@ -26,22 +26,41 @@ import Photos
     }
     var current: Clip? { project.clips.indices.contains(selected) ? project.clips[selected] : nil }
     var canUndo: Bool { !history.isEmpty }
-    func save() {
-        do { try MediaFiles.save(project); savedProjects = try MediaFiles.list() }
-        catch { self.error = "Salvataggio non riuscito: \(error.localizedDescription)" }
+    @discardableResult func save() -> Bool {
+        do { try MediaFiles.save(project); savedProjects = try MediaFiles.list(); return true }
+        catch { self.error = "Salvataggio non riuscito: \(error.localizedDescription)"; return false }
     }
     func edit(_ change: (inout Project) throws -> Void) {
         guard !busy else { return }
         do {
             var candidate = project; try change(&candidate)
             if !candidate.clips.isEmpty { try candidate.validate() }
+            try MediaFiles.save(candidate)
             history.append(project); if history.count > 30 { history.removeFirst() }
-            project = candidate; selected = max(0, min(selected, project.clips.count - 1)); save(); preview()
+            project = candidate; exportURL = nil; selected = max(0, min(selected, project.clips.count - 1)); save(); preview()
         } catch { self.error = error.localizedDescription }
     }
-    func undo() { guard !busy, let previous = history.popLast() else { return }; project = previous; selected = 0; save(); preview() }
-    func newProject() { guard !busy else { return }; save(); project = Project(); selected = 0; history = []; save(); preview() }
-    func open(_ p: Project) { guard !busy else { return }; save(); project = p; selected = 0; history = []; preview() }
+    func undo() {
+        guard !busy, let previous = history.last else { return }
+        do { try MediaFiles.save(previous); history.removeLast(); project = previous; exportURL = nil; selected = 0; save(); preview() }
+        catch { self.error = error.localizedDescription }
+    }
+    func newProject() {
+        guard !busy, save() else { return }
+        let fresh = Project()
+        do { try MediaFiles.save(fresh); project = fresh; exportURL = nil; selected = 0; history = []; save(); preview() }
+        catch { self.error = error.localizedDescription }
+    }
+    func open(_ p: Project) { guard !busy, save() else { return }; project = p; exportURL = nil; selected = 0; history = []; save(); preview() }
+    func deleteProject(_ target: Project) {
+        guard !busy else { return }
+        do {
+            try MediaFiles.delete(target)
+            if project.id == target.id { project = Project(); exportURL = nil; selected = 0; history = []; preview() }
+            savedProjects = try MediaFiles.list()
+            status = "Progetto eliminato. I video originali restano sul telefono."
+        } catch { self.error = error.localizedDescription }
+    }
     func select(_ index: Int) { selected = index; player.seek(to: CMTime(seconds: project.offset(of: index), preferredTimescale: 600)) }
     func split() { let position = player.currentTime().seconds; let index = selected; edit { try $0.split(index: index, position: position) } }
     func move(_ delta: Int) {
@@ -59,7 +78,7 @@ import Photos
                 guard !Task.isCancelled, generation == previewGeneration else { return }
                 let item = AVPlayerItem(asset: payload.composition); item.videoComposition = payload.video; item.audioMix = payload.audio
                 player.replaceCurrentItem(with: item)
-                player.seek(to: CMTime(seconds: snapshot.offset(of: selected), preferredTimescale: 600))
+                await player.seek(to: CMTime(seconds: snapshot.offset(of: selected), preferredTimescale: 600))
             } catch { if !Task.isCancelled { self.error = "Anteprima: \(error.localizedDescription)" } }
         }
     }
@@ -88,13 +107,16 @@ import Photos
             guard candidate.clips.count + urls.count <= 60 else { throw EditError.invalid("Massimo 60 clip") }
             for (i, url) in urls.enumerated() { candidate.clips.append(try await VideoEngine.inspect(url: url, name: names[i])) }
         }
+        if !candidate.clips.isEmpty { try candidate.validate() }
+        try MediaFiles.save(candidate)
         history.append(project); if history.count > 30 { history.removeFirst() }
-        project = candidate; save(); preview()
+        project = candidate; exportURL = nil; save(); preview()
     }
     func export() {
         guard !busy else { return }
         do { try project.validate() } catch { self.error = error.localizedDescription; return }
-        busy = true; exporting = true; progress = 0; status = "Preparazione esportazione…"; player.pause(); save()
+        guard save() else { return }
+        busy = true; exporting = true; exportURL = nil; progress = 0; status = "Preparazione esportazione…"; player.pause()
         UIApplication.shared.isIdleTimerDisabled = true
         let snapshot = project
         Task {
