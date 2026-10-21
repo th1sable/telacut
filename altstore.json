@@ -1,0 +1,41 @@
+{
+  "name": "TelaCut",
+  "subtitle": "Il tuo studio video mobile",
+  "description": "Distribuzione ufficiale di TelaCut tramite AltStore Classic.",
+  "website": "https://github.com/th1sable/telacut",
+  "iconURL": "https://raw.githubusercontent.com/th1sable/telacut/main/ios/TelaCut/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
+  "tintColor": "#B7ACFF",
+  "featuredApps": [
+    "dev.telacut.mobile"
+  ],
+  "news": [],
+  "apps": [
+    {
+      "name": "TelaCut",
+      "bundleIdentifier": "dev.telacut.mobile",
+      "developerName": "Luigi",
+      "subtitle": "Taglia, monta, racconta.",
+      "localizedDescription": "Monta video sul tuo iPhone: importa clip, taglia, dividi, cambia ordine, aggiungi un titolo e musica, salva i progetti ed esporta in MP4. Elaborazione sul dispositivo, senza account e senza filigrana. Questa versione non include IA, sottotitoli automatici o effetti avanzati.",
+      "iconURL": "https://raw.githubusercontent.com/th1sable/telacut/main/ios/TelaCut/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
+      "category": "photo-video",
+      "tintColor": "#B7ACFF",
+      "versions": [
+        {
+          "version": "0.2.0",
+          "buildVersion": "2",
+          "date": "2026-10-21T20:44:29Z",
+          "localizedDescription": "Montaggio locale, progetti salvati, taglio, testo, musica e MP4.",
+          "downloadURL": "https://github.com/th1sable/telacut/releases/download/v0.2.0/TelaCut-0.2.0-iPhone.ipa",
+          "size": 242712,
+          "minOSVersion": "16.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {
+          "NSPhotoLibraryAddUsageDescription": "Salva in Foto i video che scegli di esportare con TelaCut."
+        }
+      }
+    }
+  ]
+}

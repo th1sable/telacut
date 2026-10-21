@@ -1,8 +1,19 @@
 # TelaCut — studio video mobile
 
-Versione **0.2.0** in preparazione, originale, per Android e iPhone. Nome provvisorio.
+Versione **0.2.0**, originale, per Android e iPhone. Nome provvisorio.
 Non è CapCut, non ne contiene il codice o i contenuti e non dichiara parità funzionale.
-È un progetto in sviluppo: leggere `VERIFICA.md` prima di installare o distribuire.
+Funzioni, prove eseguite e limiti sono descritti qui e in `VERIFICA.md`.
+
+## Scarica e installa
+
+| Sistema | Pacchetto | Installazione |
+| --- | --- | --- |
+| Android 10+ | [TelaCut-0.2.0-Android.apk](https://github.com/th1sable/telacut/releases/download/v0.2.0/TelaCut-0.2.0-Android.apk) | APK release firmato, da aprire sul telefono |
+| iPhone con iOS 16+ | [TelaCut-0.2.0-iPhone.ipa](https://github.com/th1sable/telacut/releases/download/v0.2.0/TelaCut-0.2.0-iPhone.ipa) | Da importare e firmare tramite AltStore Classic |
+
+[Tutti i file della versione](https://github.com/th1sable/telacut/releases/tag/v0.2.0).
+I passaggi sono in `INSTALLAZIONE.txt`; gli hash sono in `SHA256SUMS.txt` tra gli allegati.
+Fonte AltStore Classic: https://raw.githubusercontent.com/th1sable/telacut/main/altstore.json
 
 ## Funzioni implementate nel codice
 
@@ -44,7 +55,7 @@ gradle -p android testDebugUnitTest assembleDebug
 ```
 
 La build debug è destinata alle verifiche ed è firmata con una chiave di sviluppo.
-L'application ID termina in `.dev`, quindi non sostituisce la futura versione pubblica.
+L'application ID termina in `.dev`, quindi non sostituisce la versione pubblica.
 
 Per la release:
 
@@ -79,19 +90,22 @@ Selezionare il proprio team di firma per un'installazione gestita da Xcode.
 La UI permette di importare dalla libreria Foto o da File. Il permesso di aggiunta a Foto
 viene richiesto soltanto quando si sceglie «Salva in Foto» dopo un'esportazione.
 
-Il workflow incluso può compilare su un runner macOS e preparare un IPA **non firmato**.
-Non è stato eseguito da questa sessione e non costituisce un IPA già disponibile.
-Il pacchetto andrà firmato/importato con un metodo appropriato, ad esempio AltStore Classic,
-rispettandone i limiti già discussi. Non è una pubblicazione su AltStore PAL.
+Il workflow compila su un runner macOS, verifica l'esportazione su un simulatore iPhone
+e prepara un IPA **non firmato** soltanto se i test passano. Gli esiti della versione
+sono riportati in `VERIFICA.md`.
+Il pacchetto viene firmato durante l'installazione tramite AltStore Classic.
+Nel normale uso gratuito sono necessari rinnovi ogni 7 giorni. Non è una pubblicazione
+su AltStore PAL. I passaggi sono in `INSTALLAZIONE.txt`.
 
 ## GitHub
 
 Repository: https://github.com/th1sable/telacut . Le compilazioni e le prove
-di esportazione vengono eseguite con GitHub Actions. Nessuna release è stata ancora pubblicata.
-Il workflow produce artefatti di sviluppo; **non pubblica automaticamente release per gli utenti**.
-Prima della distribuzione pubblica occorrono test reali, firma Android definitiva,
-build/firma iOS, istruzioni d'installazione e una scelta esplicita della licenza del progetto.
-La licenza del codice originale non è stata scelta al posto del proprietario.
+di esportazione vengono eseguite con GitHub Actions. I pacchetti per gli utenti sono nella sezione Releases.
+Il workflow produce APK release non firmati e IPA, oltre ai risultati dei test;
+**non pubblica automaticamente release per gli utenti**.
+Lo script `scripts/sign_android.ps1` firma l'APK release con la chiave privata locale
+riutilizzabile. Le istruzioni e le licenze delle dipendenze accompagnano i pacchetti.
+La licenza del codice originale resta da scegliere da parte del proprietario.
 
 ## Limiti di questa prima versione
 
@@ -101,7 +115,7 @@ La licenza del codice originale non è stata scelta al posto del proprietario.
 - Il testo è un solo titolo globale; la preview iOS usa un overlay UI e può differire
   nella disposizione dal titolo renderizzato nel file finale.
 - La preview Android usa l'API sperimentale `CompositionPlayer` di Media3 1.9.3:
-  versione fissata e opt-in esplicito; richiede prove su dispositivi prima della release.
+  versione fissata e opt-in esplicito; resta da verificare sui diversi telefoni fisici.
 - L'audio aggiunto parte dall'inizio e viene ripetuto; non ci sono fade, ritardo o limiter.
 - Nessuna sincronizzazione, autenticazione, collaborazione o gestione abbonamenti.
 - Nessuna garanzia 4K, HDR, HEVC, codec particolari o montaggi lunghi.
@@ -119,7 +133,7 @@ L'inventario non è una decompilazione e non recupera i servizi cloud.
 L'analisi approfondita è rimasta bloccata: JADX non configurato e controllo processi
 non compatibile con l'ambiente. Questo codice è una nuova implementazione indipendente.
 Dettagli e identificativi: `REA-PROVENIENZA.txt`.
-REA è stato usato anche per inventariare l'APK di TelaCut consegnato;
+REA è stato usato anche per inventariare l'APK e l'IPA di TelaCut consegnati;
 risultati, hash e limiti della verifica sono in `VERIFICA.md`.
 
 ## Documentazione tecnica usata

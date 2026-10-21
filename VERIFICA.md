@@ -1,84 +1,109 @@
-# TelaCut 0.1.0 — stato della verifica
+# TelaCut 0.2.0 - verifiche eseguite
 
-Data: 21 ottobre 2026. Questa è una prima versione di sviluppo, non una release
-pronta per il pubblico e non una ricostruzione completa di CapCut.
+Data: 21 ottobre 2026. Editor originale: le funzioni sono elencate nel README.
+Questa versione non dichiara la parità con CapCut.
 
-## Android: pacchetto compilato
+## Android
 
-File consegnato: `TelaCut-0.1.0-android-dev.apk` (15.546.779 byte).
-Requisito minimo: Android 10. Non è installabile su iPhone.
-
-SHA-256:
-
-```text
-34472d9bbc785408588661ab88c25352aacc3d83e2c5dc2d4081bcdc113a36ae
-```
-
-La build pulita Gradle con `clean :app:assembleDebug :app:testDebugUnitTest
-:app:lintDebug` è terminata con successo. Ambiente: JDK 17, Gradle 8.9,
-Android SDK 35 e Build-Tools 35.0.0.
+File: `TelaCut-0.2.0-Android.apk`, 12.995.152 byte. Package `dev.telacut.mobile`,
+versione 0.2.0, codice 2. Minimo Android 10/API 29, target API 35.
+Build release non debuggabile; il manifest finale non richiede INTERNET.
+Commit: `4108352901f94186a7554d28e323f2247128a212`.
+Verifica: https://github.com/th1sable/telacut/actions/runs/39668722229
 
 | Controllo | Risultato |
 | --- | --- |
-| Compilazione e packaging APK debug | Superati |
-| Firma APK, controllo con `apksigner verify --verbose` | Valida, schema v2, un firmatario |
-| Test unitari Java/JUnit | 16 eseguiti, nessun errore, fallimento o test saltato |
-| Verifiche aritmetiche aggiuntive della timeline | 24.752 controlli superati |
-| Android Lint | 0 errori, 7 avvertimenti |
-| Installazione, avvio e uso su telefono | Non eseguiti |
-| Anteprima, decodifica ed export effettivo su dispositivo | Non verificati |
+| Build debug/release, Gradle 8.9, Java 17, SDK 35 | Superata |
+| Test unitari timeline | 16 superati, nessuno saltato |
+| Avvio editor e ricreazione Activity su emulatore Android 15 | Superati |
+| Salvataggio, riapertura ed eliminazione progetto | Superati |
+| Esportazione MP4 reale, tagli, riordino, titolo e musica | Superata |
+| Formato verticale 1080x1920, durata, colore e pixel del testo | Verificati |
+| Allineamento zipalign e verifica firma apksigner | Superati |
+| Installazione release e utilizzo su telefono fisico | Non eseguiti |
 
-Gli avvertimenti Lint riguardano orientamento bloccato, un'API sconsigliata,
-configurazione backup per Android precedenti alla versione 12 e quattro casi
-di testo costruito nel codice. Il manifest imposta `allowBackup=false` e
-regole di esclusione per Android 12+. Gli avvertimenti restano da riesaminare
-prima di una release pubblica, insieme a localizzazione e adattamento dello schermo.
+I tre test su emulatore usano la build debug dello stesso codice.
+L'export combina due filmati originali generati (rosso e blu) e un tono audio.
+Il controllo delle dimensioni considera la rotazione MP4: Media3 può codificare
+1920x1080 con una matrice di rotazione per visualizzare 1080x1920.
 
-La firma è di sviluppo: non identifica una futura release commerciale.
-Il package è `dev.telacut.mobile.dev`. Per aggiornamenti pubblici occorre
-una propria chiave di firma stabile. Nessuna chiave privata è inclusa nei sorgenti.
-I controlli aritmetici non sono prove su telefono e non certificano l'export.
-
-## REA: ispezione dell'APK consegnato
-
-Comando eseguito con REA 6.7.0: `inspect-artifact`, sul pacchetto con l'hash sopra.
-Inventario completato: 605 nodi, 636 occorrenze e 635 relazioni.
-
-Evidence ID:
+SHA-256 APK:
 
 ```text
-ev_0b5f9fc771e37280c4098ec4aa41d7b5b941fc2b29e4fa31962b97b3c493316e
+9f867c34d53ace291c02c5198bd5731a21ac34aeef5fc8f96ab209fa5c80a068
 ```
 
-È un inventario statico del contenitore ZIP, non un'esecuzione dell'app,
-una verifica funzionale o un audit di sicurezza. Il numero di nodi non è
-il numero di funzioni dell'app. Il controllo della firma sopra è separato da REA.
-La provenienza della precedente analisi di riferimento è in `REA-PROVENIENZA.txt`.
+Firma: APK Signature Scheme v3, RSA 3072 bit, un firmatario, CN=TelaCut.
+SHA-256 certificato pubblico:
 
-## iPhone: sorgenti, non un IPA pronto
+```text
+cbb7368be24e7d8cda00645aa243976a606748e5445bed2b03817444acee86a7
+```
 
-Sono inclusi progetto XcodeGen, sorgenti SwiftUI/AVFoundation, sei test XCTest
-e workflow GitHub Actions per un runner macOS. Nessun workflow è stato eseguito
-su GitHub e nessun repository è stato modificato o pubblicato.
+Chiave e password protetta restano locali in `.signing`, escluse da Git
+e dagli archivi. Conservarle per firmare gli aggiornamenti.
 
-- Parsing sintattico dei file Swift superato con tree-sitter.
-- Controlli strutturali XML, plist, YAML e dell'icona superati.
-- Nessuna compilazione o verifica dei tipi con il compilatore Swift/Xcode.
-- Test XCTest, simulatore e iPhone reale non eseguiti.
-- Nessun IPA prodotto, firmato, installato o collaudato.
+## REA sul pacchetto Android release
 
-Il parsing non esclude errori di API, tipi, concorrenza o comportamento.
-La prossima verifica necessaria è una build su macOS/Xcode, seguita dai test
-e da un'installazione autorizzata sul proprio iPhone. L'eventuale IPA non firmato
-generato dal workflow necessita ancora di firma e di un metodo d'installazione.
+REA 6.7.0, `inspect-artifact`, sul pacchetto firmato con l'hash sopra.
+Inventario: 609 nodi, 640 occorrenze, 639 relazioni.
+Evidence: `ev_330d75940373627640bae14a356bbb9517b18999b83f38f60aee6809582f340e`.
+Evidence inventario: `ev_009984fd49fa81ecb0ab4086176bd46e211a88239f156f77ff143764536bc0f5`.
+JSON completo locale: `dist/REA-Android-0.2.0.json`.
 
-## Prima di distribuire ai consumatori
+È un inventario delle entry ZIP, non una prova funzionale o di firma.
+REA segnala nomi coincidenti ignorando maiuscole/minuscole; i byte del blocco
+firma APK non sono entry ZIP. La firma è stata verificata separatamente.
 
-Eseguire la checklist `TEST-SU-TELEFONO.md` su entrambe le piattaforme,
-correggere i problemi emersi, scegliere la licenza, completare la verifica
-delle dipendenze e delle rispettive attribuzioni e predisporre firme e istruzioni.
-Le funzioni mancanti rispetto a un editor completo sono elencate nel README.
+## iPhone
 
-Non sono stati caricati video personali, attivati servizi a pagamento o
-pubblicati repository/release. L'archivio sorgente non include l'APK di CapCut,
-cache di compilazione, SDK o chiavi di firma.
+File: `TelaCut-0.2.0-iPhone.ipa`, 242.712 byte. Bundle `dev.telacut.mobile`,
+versione 0.2.0, build 2. Minimo iOS 16.0.
+Build release per dispositivo iPhoneOS, eseguibile Mach-O ARM64 da 1.076.000 byte;
+non è una build per simulatore. Il bit eseguibile è conservato nell'archivio.
+Xcode 16.4, SDK iOS 18.5, runner macOS 15.7.9.
+Commit: `3fd11e91b0182196c81e73bd2633231338420af9`.
+Verifica Android e iPhone completata con successo:
+https://github.com/th1sable/telacut/actions/runs/39671973955
+
+| Controllo | Risultato |
+| --- | --- |
+| Build release per iPhone e creazione IPA dopo i test | Superate |
+| Test di modello, limiti, divisione, riordino e serializzazione | 6 superati |
+| Salvataggio, riapertura ed eliminazione progetto | Superati |
+| Esportazione MP4 reale con tagli, riordino, titolo e musica | Superata |
+| 1080x1920, durata di 2 secondi, ordine clip, pixel del titolo, traccia audio | Verificati |
+| Totale test su iPhone 16 Pro simulato, iOS 18.5 ARM64 | 8 superati, 0 falliti, 0 saltati |
+| Integrità ZIP, Info.plist e presenza eseguibile nativo | Verificate |
+| Installazione e utilizzo su iPhone fisico tramite AltStore | Non eseguiti |
+
+Il fotogramma decodificato allegato al test è stato anche controllato visivamente:
+clip blu, bande nere proporzionate al formato e titolo bianco leggibile in basso.
+I test usano media sintetici originali, non video personali.
+
+SHA-256 IPA:
+
+```text
+c57417f012595f0f245c90be0b6810c6fa1ea6b7baf8a6f3a85325baa29fd242
+```
+
+Il pacchetto non è firmato con un certificato personale Apple. AltStore Classic
+deve applicare la firma durante l'installazione. La compilazione e i test non
+sostituiscono la verifica sul proprio iPhone. Nel normale uso gratuito la firma
+va rinnovata ogni 7 giorni; vedere `INSTALLAZIONE.txt`.
+
+## REA sul pacchetto iPhone
+
+REA 6.7.0, `inspect-artifact`, sull'IPA con l'hash sopra.
+Inventario: 7 nodi, 7 occorrenze, 6 relazioni.
+Evidence: `ev_976ea30fcce897f9ce6ef2d2b9a27004dfce597fc3f25239138ac18aaa51d353`.
+Evidence inventario: `ev_09d1793f69431ada0458a567935690254d5cd35113a8cb5e1b13f23d37a523dc`.
+JSON completo locale: `dist/REA-iPhone-0.2.0.json`.
+L'inventario elenca le entry ZIP; non esegue l'app e non verifica la firma Apple.
+
+## Limiti
+
+Non verificati tutti i codec, HDR/4K, montaggi lunghi, spazio esaurito,
+selettori Foto/File e condivisione su telefoni fisici.
+Per questi controlli vedere `TEST-SU-TELEFONO.md`.
+I limiti funzionali sono nel README. Nessun video personale è stato caricato.
