@@ -70,6 +70,15 @@ jobs:
           -derivedDataPath ios/DerivedData CODE_SIGNING_ALLOWED=NO build
       - name: Run model, storage and video export tests on an iPhone simulator
         run: python3 scripts/test_ios_simulator.py
+      - name: Preserve iPhone test results and crash diagnostics
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: TelaCut-iOS-test-results
+          path: |
+            ios/TestResults.xcresult
+            ios/TestDiagnostics
+          if-no-files-found: warn
       - name: Package for subsequent signing
         run: python3 scripts/package_ipa.py ios/DerivedData/Build/Products/Release-iphoneos/TelaCut.app dist/TelaCut-unsigned.ipa
       - uses: actions/upload-artifact@v4

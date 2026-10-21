@@ -55,8 +55,11 @@ final class VideoExportTests: XCTestCase {
     }
 
     func testExportRendersCutsOrderTitleAndMusic() async throws {
+        NSLog("TelaCut export test: generating red fixture")
         let red = try await movie(color: CIColor(red: 1, green: 0, blue: 0))
+        NSLog("TelaCut export test: generating blue fixture")
         let blue = try await movie(color: CIColor(red: 0, green: 0, blue: 1))
+        NSLog("TelaCut export test: preparing music and composition")
         let sound = try music()
         let output = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mp4")
         defer { for url in [red, blue, sound, output] { try? FileManager.default.removeItem(at: url) } }
@@ -69,10 +72,12 @@ final class VideoExportTests: XCTestCase {
         project.musicFile = sound.lastPathComponent
         project.muteOriginal = true
         let payload = try await VideoEngine.build(project, forExport: true)
+        NSLog("TelaCut export test: composition ready, starting export")
         let exporter = try XCTUnwrap(AVAssetExportSession(asset: payload.composition, presetName: AVAssetExportPresetHighestQuality))
         exporter.outputURL = output; exporter.outputFileType = .mp4
         exporter.videoComposition = payload.video; exporter.audioMix = payload.audio
         await exporter.export()
+        NSLog("TelaCut export test: export finished with status %ld", exporter.status.rawValue)
         XCTAssertEqual(exporter.status, .completed, exporter.error?.localizedDescription ?? "Export incomplete")
         let asset = AVURLAsset(url: output)
         let duration = try await asset.load(.duration)
@@ -84,6 +89,7 @@ final class VideoExportTests: XCTestCase {
         let audioTracks = try await asset.loadTracks(withMediaType: .audio)
         XCTAssertEqual(audioTracks.count, 1)
         let generator = AVAssetImageGenerator(asset: asset)
+        NSLog("TelaCut export test: checking decoded pixels")
         generator.appliesPreferredTrackTransform = true
         let frame = try generator.copyCGImage(at: CMTime(seconds: 0.25, preferredTimescale: 600), actualTime: nil)
         var bytes = [UInt8](repeating: 0, count: frame.width * frame.height * 4)

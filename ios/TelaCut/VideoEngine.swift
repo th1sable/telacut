@@ -16,7 +16,7 @@ enum VideoEngine {
         guard duration.isFinite, duration >= 0.1 else { throw EditError.invalid("Video troppo breve o non leggibile") }
         return Clip(file: url.lastPathComponent, name: name, sourceDuration: duration, end: duration)
     }
-    static func build(_ project: Project, forExport: Bool) async throws -> RenderPayload {
+    @MainActor static func build(_ project: Project, forExport: Bool) async throws -> RenderPayload {
         try project.validate()
         let composition = AVMutableComposition()
         guard let videoTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid) else { throw EditError.invalid("Motore video non disponibile") }
@@ -78,7 +78,6 @@ enum VideoEngine {
         // CoreAnimationTool is export-only; the preview draws the title as a SwiftUI overlay.
         if forExport && !project.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let parent = CALayer(); parent.frame = CGRect(origin: .zero, size: size)
-            let picture = CALayer(); picture.frame = parent.bounds; parent.addSublayer(picture)
             let title = CATextLayer()
             title.string = project.title; title.font = CTFontCreateWithName("HelveticaNeue-Medium" as CFString, 48, nil)
             title.fontSize = 48; title.alignmentMode = .center; title.isWrapped = true
@@ -87,7 +86,15 @@ enum VideoEngine {
             let bounds = (project.title as NSString).boundingRect(with: CGSize(width: size.width * 0.8, height: 500), options: [.usesLineFragmentOrigin, .usesFontLeading], attributes: [.font: UIFont.systemFont(ofSize: 48, weight: .semibold)], context: nil)
             title.frame = CGRect(x: size.width * 0.1, y: size.height * 0.1, width: size.width * 0.8, height: min(500, ceil(bounds.height) + 20))
             parent.addSublayer(title)
-            video.animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: picture, in: parent)
+            // Composite the title as a separate track. The post-processing API can
+            // crash inside CoreAnimation/IOSurface on iOS simulators.
+            let titleTrackID = composition.unusedTrackID()
+            video.animationTool = AVVideoCompositionCoreAnimationTool(additionalLayer: parent, asTrackID: titleTrackID)
+            for case let instruction as AVMutableVideoCompositionInstruction in instructions {
+                let overlay = AVMutableVideoCompositionLayerInstruction()
+                overlay.trackID = titleTrackID
+                instruction.layerInstructions.insert(overlay, at: 0)
+            }
         }
         return RenderPayload(composition: composition, video: video, audio: mix)
     }

@@ -2,6 +2,9 @@
 **/build/
 **/local.properties
 **/DerivedData/
+**/TestDerivedData/
+**/TestResults.xcresult/
+**/TestDiagnostics/
 **/*.xcodeproj/
 **/*.xcworkspace/
 *.keystore
