@@ -85,7 +85,7 @@ jobs:
           path: |
             ios/TestResults.xcresult
             ios/TestDiagnostics
-            ios/TelaCut-iPhone.png
+            ios/TestAttachments
           if-no-files-found: warn
       - name: Package for subsequent signing
         run: python3 scripts/package_ipa.py ios/DerivedData/Build/Products/Release-iphoneos/TelaCut.app dist/TelaCut-unsigned.ipa

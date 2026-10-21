@@ -5,6 +5,7 @@
 **/TestDerivedData/
 **/TestResults.xcresult/
 **/TestDiagnostics/
+**/TestAttachments/
 **/*.xcodeproj/
 **/*.xcworkspace/
 *.keystore

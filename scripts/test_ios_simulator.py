@@ -1,7 +1,6 @@
 """Select an actually installed simulator; fail if none is available."""
 import json
 import subprocess
-import time
 from pathlib import Path
 
 data = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '--json']))
@@ -18,8 +17,8 @@ if Path('ios/TestResults.xcresult').exists():
     subprocess.run(['xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path', 'ios/TestResults.xcresult'])
     subprocess.run(['xcrun', 'xcresulttool', 'export', 'diagnostics', '--path', 'ios/TestResults.xcresult',
                     '--output-path', 'ios/TestDiagnostics'])
-if result.returncode == 0:
-    subprocess.run(['xcrun', 'simctl', 'launch', phones[0]['udid'], 'dev.telacut.mobile'], check=True)
-    time.sleep(1)
-    subprocess.run(['xcrun', 'simctl', 'io', phones[0]['udid'], 'screenshot', 'ios/TelaCut-iPhone.png'], check=True)
+    # Xcode shuts the simulator down after testing. Export the frame attachment
+    # from xcresult instead of attempting to relaunch a shutdown device.
+    subprocess.run(['xcrun', 'xcresulttool', 'export', 'attachments', '--path', 'ios/TestResults.xcresult',
+                    '--output-path', 'ios/TestAttachments'])
 raise SystemExit(result.returncode)
