@@ -1,0 +1,51 @@
+name: Build TelaCut (development artifacts)
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - run: gradle -p android --no-daemon testDebugUnitTest assembleDebug assembleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TelaCut-Android-development
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/release/*unsigned.apk
+            android/app/build/reports/tests/
+          if-no-files-found: error
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install xcodegen
+      - run: xcodegen generate --spec ios/project.yml --project ios
+      - name: Build iPhone application (unsigned)
+        run: >-
+          xcodebuild -project ios/TelaCut.xcodeproj -scheme TelaCut
+          -configuration Release -sdk iphoneos -destination 'generic/platform=iOS'
+          -derivedDataPath ios/DerivedData CODE_SIGNING_ALLOWED=NO build
+      - name: Run model tests on an available iPhone simulator
+        run: python3 scripts/test_ios_simulator.py
+      - name: Package for subsequent signing
+        run: python3 scripts/package_ipa.py ios/DerivedData/Build/Products/Release-iphoneos/TelaCut.app dist/TelaCut-unsigned.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TelaCut-iOS-unsigned
+          path: dist/TelaCut-unsigned.ipa
+          if-no-files-found: error

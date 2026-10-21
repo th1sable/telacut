@@ -1,0 +1,13 @@
+**/.gradle/
+**/build/
+**/local.properties
+**/DerivedData/
+**/*.xcodeproj/
+**/*.xcworkspace/
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+*.apk
+*.ipa
+.DS_Store

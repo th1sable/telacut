@@ -1,0 +1,38 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'dev.telacut.mobile'
+    compileSdk 35
+    buildToolsVersion '35.0.0'
+    defaultConfig {
+        applicationId 'dev.telacut.mobile'
+        minSdk 29
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    signingConfigs {
+        release {
+            def path = System.getenv('TELACUT_KEYSTORE_PATH')
+            if (path) {
+                storeFile file(path)
+                storePassword System.getenv('TELACUT_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('TELACUT_KEY_ALIAS')
+                keyPassword System.getenv('TELACUT_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        debug { applicationIdSuffix '.dev'; versionNameSuffix '-dev' }
+        release {
+            minifyEnabled false
+            if (System.getenv('TELACUT_KEYSTORE_PATH')) signingConfig signingConfigs.release
+        }
+    }
+}
+dependencies {
+    implementation 'androidx.media3:media3-transformer:1.9.3'
+    implementation 'androidx.media3:media3-effect:1.9.3'
+    implementation 'androidx.media3:media3-ui:1.9.3'
+    testImplementation 'junit:junit:4.13.2'
+}

@@ -1,0 +1,42 @@
+name: TelaCut
+options:
+  bundleIdPrefix: dev.telacut
+  deploymentTarget:
+    iOS: '16.0'
+settings:
+  base:
+    SWIFT_VERSION: '5.0'
+    TARGETED_DEVICE_FAMILY: '1'
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  TelaCut:
+    type: application
+    platform: iOS
+    sources:
+      - path: TelaCut
+        excludes: ['Info.plist']
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.telacut.mobile
+        INFOPLIST_FILE: TelaCut/Info.plist
+        CODE_SIGN_STYLE: Automatic
+        MARKETING_VERSION: '0.1.0'
+        CURRENT_PROJECT_VERSION: 1
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  TelaCutTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [TelaCutTests]
+    dependencies:
+      - target: TelaCut
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  TelaCut:
+    build:
+      targets:
+        TelaCut: all
+        TelaCutTests: [test]
+    test:
+      targets: [TelaCutTests]

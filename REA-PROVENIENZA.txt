@@ -1,0 +1,23 @@
+REA è stato usato per inventariare un campione Android, non per recuperare
+il sorgente completo di CapCut o per dimostrare la parità di TelaCut.
+
+Versione: rea-agents 6.7.0
+Operazione: inspect-artifact
+Esito: inventario contenitore completato; 27462 nodi, 27634 occorrenze.
+Campione proveniente dal link della pagina ufficiale:
+https://www.capcut.com/tools/capcut-apk-latest-version-android-download
+SHA-256 APK:
+f2d5cf017bc4bf5a2d3e500a1a8c13cf0c83e3fa1bc707c6603e91af9b77612a
+Evidence ID:
+ev_2d695b5786d54457604bf1424763b2ef4f48367733e67e374e90927dad1fff6d
+
+Versione interna del campione non verificata. Non è stato esaminato l'IPA.
+Il campione originale e i suoi contenuti non sono inclusi nel progetto TelaCut.
+Non è stata effettuata una verifica separata della firma del publisher.
+
+Limiti: inventario delle entry ZIP; non dimostra semantica o comportamento.
+Blocco inspect-android-package: REA_JADX_MCP_JAR non configurato.
+Blocco doctor: process-ownership, errore ps «fatal library error, lookup self».
+Il codice TelaCut è scritto da zero sulla base degli obiettivi concordati e
+delle API documentate di Android/iOS. Nessuna funzione è dichiarata
+ricostruita da una decompilazione che non è stata eseguita.
