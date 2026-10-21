@@ -18,3 +18,5 @@ __pycache__/
 .signing/
 dist/
 android/app/src/androidTest/assets/
+ios/TelaCutTests/Fixtures/
+ios/TelaCut-iPhone.png

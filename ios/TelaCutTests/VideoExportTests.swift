@@ -1,66 +1,22 @@
 import XCTest
 import AVFoundation
-import CoreImage
 @testable import TelaCut
 
 final class VideoExportTests: XCTestCase {
-    private func movie(color: CIColor) async throws -> URL {
+    private func fixture(_ name: String, extension fileExtension: String) throws -> URL {
         try MediaFiles.prepare()
-        let url = MediaFiles.media.appendingPathComponent(UUID().uuidString + ".mov")
-        let writer = try AVAssetWriter(outputURL: url, fileType: .mov)
-        let input = AVAssetWriterInput(mediaType: .video, outputSettings: [
-            AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: 320, AVVideoHeightKey: 180
-        ])
-        let adaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: input, sourcePixelBufferAttributes: [
-            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
-            kCVPixelBufferWidthKey as String: 320, kCVPixelBufferHeightKey as String: 180,
-            kCVPixelBufferIOSurfacePropertiesKey as String: [:]
-        ])
-        writer.add(input)
-        guard writer.startWriting() else { throw writer.error ?? EditError.invalid("Fixture writer failed") }
-        writer.startSession(atSourceTime: .zero)
-        let context = CIContext()
-        let image = CIImage(color: color).cropped(to: CGRect(x: 0, y: 0, width: 320, height: 180))
-        for index in 0..<60 {
-            let deadline = Date().addingTimeInterval(10)
-            while !input.isReadyForMoreMediaData {
-                guard writer.status == .writing, Date() < deadline else { throw EditError.invalid("Fixture writer stalled") }
-                try await Task.sleep(nanoseconds: 1_000_000)
-            }
-            var buffer: CVPixelBuffer?
-            guard let pool = adaptor.pixelBufferPool,
-                  CVPixelBufferPoolCreatePixelBuffer(nil, pool, &buffer) == kCVReturnSuccess,
-                  let pixel = buffer else { throw EditError.invalid("Fixture buffer failed") }
-            context.render(image, to: pixel)
-            guard adaptor.append(pixel, withPresentationTime: CMTime(value: Int64(index), timescale: 30)) else {
-                throw writer.error ?? EditError.invalid("Fixture frame failed")
-            }
-        }
-        writer.endSession(atSourceTime: CMTime(seconds: 2, preferredTimescale: 600))
-        input.markAsFinished()
-        await writer.finishWriting()
-        guard writer.status == .completed else { throw writer.error ?? EditError.invalid("Fixture movie failed") }
-        return url
-    }
-
-    private func music() throws -> URL {
-        let url = MediaFiles.media.appendingPathComponent(UUID().uuidString + ".caf")
-        let format = AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 1)!
-        let file = try AVAudioFile(forWriting: url, settings: format.settings)
-        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 48000)!
-        buffer.frameLength = 48000
-        for i in 0..<48000 { buffer.floatChannelData![0][i] = Float(sin(Double(i) * 2 * .pi * 220 / 48000)) * 0.2 }
-        try file.write(from: buffer)
+        let source = try XCTUnwrap(Bundle(for: Self.self).url(forResource: name, withExtension: fileExtension))
+        let url = MediaFiles.media.appendingPathComponent(UUID().uuidString + "." + fileExtension)
+        try FileManager.default.copyItem(at: source, to: url)
         return url
     }
 
     func testExportRendersCutsOrderTitleAndMusic() async throws {
-        NSLog("TelaCut export test: generating red fixture")
-        let red = try await movie(color: CIColor(red: 1, green: 0, blue: 0))
-        NSLog("TelaCut export test: generating blue fixture")
-        let blue = try await movie(color: CIColor(red: 0, green: 0, blue: 1))
+        NSLog("TelaCut export test: loading original test videos")
+        let red = try fixture("red", extension: "mp4")
+        let blue = try fixture("blue", extension: "mp4")
         NSLog("TelaCut export test: preparing music and composition")
-        let sound = try music()
+        let sound = try fixture("music", extension: "wav")
         let output = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mp4")
         defer { for url in [red, blue, sound, output] { try? FileManager.default.removeItem(at: url) } }
         var project = Project()
